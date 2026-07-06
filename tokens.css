@@ -1,0 +1,113 @@
+/*
+  360n Design-Tokens — Quelle: Website-Repo attractsoft/360n-website (src/index.css, @theme-Block)
+  plus Console-Erweiterung Kapitel 007 (Semantik-Farben) aus docs/04-umsetzung/12-design-system.
+
+  Einbindung in einer Next.js-App (Tailwind 4, globals.css):
+
+    @import "tailwindcss";
+    @import "@360n-gmbh/ui/tokens.css";
+    @source "../node_modules/@360n-gmbh/ui/src";
+
+  Die Fonts (Cascadia Code 300, Inter 600) lädt die App selbst — in Next.js über
+  next/font/google, nicht über einen Google-Fonts-@import.
+*/
+
+@theme {
+  /* Zwei Stimmen: Copy in Cascadia Code Light (300, ss01) — Headlines h1–h5 in Inter SemiBold (600) */
+  --font-sans: "Cascadia Code", ui-monospace, monospace;
+  --font-display: "Inter", system-ui, sans-serif;
+
+  --color-ink: #0a0a0a;
+  --color-ink-soft: #272727;
+  --color-ink-deep: #131313;
+  --color-paper: #f5f5f5;
+  --color-card: #ffffff;
+  --color-line: #e7e7e7;
+  --color-mist: #e9e9e9;
+  --color-muted: #6f6f6f;
+  --color-lime: #d2ff37;
+  --color-frost: #eaf0fb; /* helles Blau für Hero-Panels — die Paper-Fuge bleibt sichtbar */
+  --color-cobalt: #2736d0; /* Footer-Panel, „läuft/Info" */
+
+  /* Semantik-Erweiterung für die Console (Kapitel 007):
+     nur als Punkt, Text oder dünne Fläche — nie als Panel.
+     Lime bleibt „gesund/aktiv", Cobalt „läuft/Info". */
+  --color-signal: #e5484d;
+  --color-signal-soft: #fbeaea;
+  --color-amber: #e39a0b;
+  --color-amber-soft: #fdf3dd;
+
+  --radius-card: 14px;
+  --radius-panel: 18px;
+
+  --ease-fabrica: cubic-bezier(0.56, 0.22, 0.05, 0.99);
+
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-marquee-slow: marquee 45s linear infinite;
+  /* Skeleton-Schimmer — der Lade-Standard für Listen, Tabellen und Karten */
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-blink: blink 1.1s steps(1) infinite;
+  --animate-toast-in: toast-in 0.45s cubic-bezier(0.56, 0.22, 0.05, 0.99);
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 300; /* Light-Copy — 200 war zu zart für Fließtext */
+    font-feature-settings: "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: var(--font-display); /* Inter */
+    font-weight: 600; /* SemiBold-Headlines */
+  }
+
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-ink);
+  }
+}
