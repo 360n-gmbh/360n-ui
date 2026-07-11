@@ -147,11 +147,15 @@ Kein Build-Schritt — die Quellen sind das Artefakt.
 
 ## Veröffentlichung
 
+Der aktive `.github/workflows/ci.yml` prüft `npm ci`, Audit ab Moderate, TypeScript
+und ESLint bei jedem Push auf `main` sowie bei jedem Pull Request; Actions sind auf
+volle Commit-SHAs gepinnt.
+
 Ein GitHub-Release (oder manueller Workflow-Start) publiziert das Paket über
 `.github/workflows/publish.yml` nach GitHub Packages
 (`https://npm.pkg.github.com`, Scope `@360n-gmbh`).
 
-> **Einmalig nachziehen:** Die CI-Datei liegt derzeit geparkt unter
+> **Einmalig nachziehen:** Nur die Publish-Datei liegt derzeit geparkt unter
 > `.github/publish.workflow.yml` (der Einrichtungs-Token durfte keine
 > Workflow-Dateien pushen). Nach `.github/workflows/publish.yml` verschieben —
 > am schnellsten im GitHub-Web-UI, oder lokal nach `gh auth refresh -s workflow`.

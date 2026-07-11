@@ -5,5 +5,11 @@ dist/
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
 *.tsbuildinfo
 .DS_Store
