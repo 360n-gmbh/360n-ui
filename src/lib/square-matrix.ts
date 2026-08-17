@@ -1,5 +1,53 @@
 export type SquareMatrixDomain = readonly [number, number];
 
+/**
+ * Visuelle Unterteilung einer logischen Matrixzelle. Die Datengenauigkeit
+ * bleibt dabei unverändert; nur das industrielle Raster wird feiner.
+ */
+export type SquareMatrixDensity = "regular" | "dense" | "ultra";
+
+const squareMatrixSubdivisions: Record<SquareMatrixDensity, number> = {
+  regular: 1,
+  dense: 2,
+  ultra: 3,
+};
+
+export function squareMatrixSubdivision(density: SquareMatrixDensity) {
+  return squareMatrixSubdivisions[density];
+}
+
+/**
+ * Unterteilt ein zeilenweise sortiertes Raster, ohne die räumliche Zuordnung
+ * seiner logischen Zellen zu verlieren. Unvollständige letzte Zeilen werden
+ * mit `null` aufgefüllt, damit Subtiles nicht in die nächste Zeile rutschen.
+ */
+export function subdivideSquareMatrixGrid<T>(
+  cells: T[],
+  columns: number,
+  subdivision: number,
+): Array<T | null> {
+  if (cells.length === 0) return [];
+  const columnCount = Number.isFinite(columns) ? Math.max(1, Math.round(columns)) : 1;
+  const subdivisionCount = Number.isFinite(subdivision)
+    ? Math.max(1, Math.round(subdivision))
+    : 1;
+  const rowCount = Math.ceil(cells.length / columnCount);
+  const result: Array<T | null> = [];
+
+  for (let row = 0; row < rowCount; row += 1) {
+    for (let tileRow = 0; tileRow < subdivisionCount; tileRow += 1) {
+      for (let column = 0; column < columnCount; column += 1) {
+        const cell = cells[row * columnCount + column] ?? null;
+        for (let tileColumn = 0; tileColumn < subdivisionCount; tileColumn += 1) {
+          result.push(cell);
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
 export function finiteMatrixValue(value: number) {
   return Number.isFinite(value) ? value : 0;
 }

@@ -120,8 +120,8 @@ Tints) sowie Shimmer-, Blink- und Toast-Keyframes und die Base-Layer
 | `Skeleton` | Mist-Schimmer — **der Lade-Standard** |
 | `EmptyState` | gestrichelte Karte mit Icon-Kachel und Primäraktion |
 | `KpiCard`, `Sparkline` | KPI-Zahl mit Delta-Pill und kompakter Square-Matrix-Sparkline |
-| `SquareMatrixChart` | responsive Zeitreihe aus Quadratstapeln; Hover/Fokus in Ink, optionale Lime-Akzente |
-| `SquareMatrixBreakdown` | 100-Zellen-Verteilung als quadratischer Pie-/Donut-Ersatz mit Segmentfokus |
+| `SquareMatrixChart` | responsive Zeitreihe aus feinen Quadratstapeln; Hover/Fokus in Ink, regelbare Rasterdichte |
+| `SquareMatrixBreakdown` | 100 logische Zellen als fein unterteilte Pie-/Donut-Alternative mit Segmentfokus |
 | `Section`, `SectionLabel` | Seitensektion + Eyebrow-Label mit Lime-Punkt |
 | `Tabs`, `Breadcrumbs` | Navigation (Ink-Unterstrich, Muted-Brotkrumen) |
 | `DataTable` | generisch: Spalten-Definition, sortierbar, rechtsbündige Zahlen, Footer-Pagination, Skeleton-Ladezustand |

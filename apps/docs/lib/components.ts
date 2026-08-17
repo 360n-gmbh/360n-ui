@@ -217,9 +217,9 @@ export const components: ComponentDoc[] = [
     name: "SquareMatrixChart",
     category: "Daten",
     description:
-      "Responsive Zeitreihe aus vertikalen Quadratstapeln mit tastaturbedienbarer Detailansicht.",
+      "Responsive Zeitreihe aus feinen vertikalen Quadratstapeln mit tastaturbedienbarer Detailansicht.",
     guidance:
-      "Für Mengen, Kosten und Nutzungsverläufe mit 12 bis etwa 60 Perioden. Grau trägt die Serie, Ink markiert Hover und Fokus; Lime bleibt einer gezielten Akzentserie oder aktiven Hervorhebung vorbehalten.",
+      "Für Mengen, Kosten und Nutzungsverläufe mit 12 bis etwa 60 Perioden. Dense unterteilt jede logische Zelle in ein enges 2×2-Raster, ohne zusätzliche Datengenauigkeit vorzutäuschen. Grau trägt die Serie, Ink markiert Hover und Fokus; Lime bleibt einer gezielten Akzentserie oder aktiven Hervorhebung vorbehalten.",
     code: `import { SquareMatrixChart } from "@360n-gmbh/ui";
 
 const days = [
@@ -263,6 +263,13 @@ const days = [
         type: "boolean",
         default: "false",
         description: "Verdichtete StatCard-Variante mit fünf Zeilen und ohne sichtbare Caption.",
+      },
+      {
+        name: "density",
+        type: '"regular" | "dense" | "ultra"',
+        default: '"dense"',
+        description:
+          "Unterteilt jede logische Zelle visuell in 1×1, 2×2 oder 3×3 kleine Quadrate; Werte und Bedienung bleiben gleich.",
       },
       {
         name: "height",
@@ -320,9 +327,9 @@ const days = [
     name: "SquareMatrixBreakdown",
     category: "Daten",
     description:
-      "100-Zellen-Matrix als präziser, interaktiver Ersatz für Pie- und Donut-Diagramme.",
+      "100 logische Zellen als fein unterteilte, interaktive Alternative zu Pie- und Donut-Diagrammen.",
     guidance:
-      "Für Anteile eines Ganzen mit höchstens sechs Segmenten. Jede Zelle entspricht bei der Standardgröße ungefähr einem Prozentpunkt; Hover oder Tastaturfokus färben das vollständige Segment schwarz.",
+      "Für Anteile eines Ganzen mit höchstens sechs Segmenten. Jede logische Zelle entspricht bei der Standardgröße ungefähr einem Prozentpunkt und wird in Dense als enges 2×2-Raster gezeichnet; Hover oder Tastaturfokus färben das vollständige Segment schwarz.",
     code: `import { SquareMatrixBreakdown } from "@360n-gmbh/ui";
 
 <SquareMatrixBreakdown
@@ -352,6 +359,13 @@ const days = [
         type: "number",
         default: "10",
         description: "Spaltenzahl; 10 erzeugt mit 100 Zellen das klassische 10×10-Raster.",
+      },
+      {
+        name: "density",
+        type: '"regular" | "dense" | "ultra"',
+        default: '"dense"',
+        description:
+          "Visuelle Unterteilung einer logischen Zelle in 1×1, 2×2 oder 3×3 Subtiles; die Anteilsauflösung bleibt durch cells definiert.",
       },
       { name: "activeId", type: "string | null", description: "Kontrolliertes aktives Segment." },
       {

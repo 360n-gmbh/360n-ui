@@ -3,15 +3,14 @@
 import { useId, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { cx } from "../lib/cx";
-import { nextSquareMatrixIndex, normalizeSquareMatrixValues } from "../lib/square-matrix";
+import {
+  nextSquareMatrixIndex,
+  normalizeSquareMatrixValues,
+  squareMatrixSubdivision,
+} from "../lib/square-matrix";
+import type { SquareMatrixDensity } from "../lib/square-matrix";
 
-export type SquareMatrixTone =
-  | "neutral"
-  | "soft"
-  | "strong"
-  | "lime"
-  | "amber"
-  | "signal";
+export type SquareMatrixTone = "neutral" | "soft" | "strong" | "lime" | "amber" | "signal";
 export type SquareMatrixActiveTone = "ink" | "lime";
 
 export type SquareMatrixDatum = {
@@ -31,6 +30,8 @@ export type SquareMatrixAxisLabels = {
   start: string;
   middle?: string;
   end: string;
+  /** Optionale vollständige Tick-Reihe; wird gleichmäßig über die Achse verteilt. */
+  ticks?: readonly string[];
 };
 
 export type SquareMatrixChartProps = {
@@ -41,8 +42,13 @@ export type SquareMatrixChartProps = {
   rows?: number;
   /** Zeigt höchstens die letzten N Perioden; die Originaldaten bleiben unverändert. */
   maxColumns?: number;
-  /** Verdichtete Variante für StatCards: weniger Zeilen, ohne sichtbare Caption und Tooltip. */
+  /**
+   * Verdichtete Variante für StatCards: weniger Zeilen, ohne sichtbare Caption
+   * und Tooltip. Explizite `axisLabels` bleiben als schmale Zeitachse sichtbar.
+   */
   compact?: boolean;
+  /** Visuelle Unterteilung pro logischer Zelle; ändert weder Werte noch Interaktion. */
+  density?: SquareMatrixDensity;
   /** Responsive Zeichenhöhe; Default 240 px, in `compact` 36 px. */
   height?: number | string;
   /** Explizite Wertedomäne; Default ist 0 bis zum höchsten Datenwert. */
@@ -66,9 +72,8 @@ export type SquareMatrixChartProps = {
   className?: string;
 };
 
-const CELL = 10;
-const GAP = 3;
-const STEP = CELL + GAP;
+const TILE = 4;
+const TILE_GAP = 1;
 
 const toneStyle: Record<SquareMatrixTone, { fill: string; opacity: number }> = {
   neutral: { fill: "var(--color-muted)", opacity: 0.55 },
@@ -108,6 +113,7 @@ export function SquareMatrixChart({
   rows = 10,
   maxColumns,
   compact = false,
+  density = "dense",
   height,
   domain,
   axisLabels,
@@ -122,6 +128,7 @@ export function SquareMatrixChart({
 }: SquareMatrixChartProps) {
   const descriptionId = useId();
   const tooltipId = useId();
+  const patternPrefix = useId().replaceAll(":", "");
   const buttons = useRef<Array<SVGRectElement | null>>([]);
   const visibleData = useMemo(() => {
     if (maxColumns == null || !Number.isFinite(maxColumns)) return data;
@@ -135,6 +142,9 @@ export function SquareMatrixChart({
   const controlled = activeId !== undefined;
   const resolvedActiveId = controlled ? activeId : internalActiveId;
   const rowCount = boundedRows(compact && rows === 10 ? 5 : rows);
+  const subdivision = squareMatrixSubdivision(density);
+  const logicalCell = subdivision * TILE + (subdivision - 1) * TILE_GAP;
+  const step = logicalCell + TILE_GAP;
 
   const chart = useMemo(() => {
     const counts = normalizeSquareMatrixValues(
@@ -147,8 +157,13 @@ export function SquareMatrixChart({
 
   const activeIndex = chart.findIndex(({ datum }) => datum.id === resolvedActiveId);
   const active = activeIndex >= 0 ? chart[activeIndex] : null;
-  const chartWidth = Math.max(CELL, chart.length * STEP - GAP);
-  const chartHeight = rowCount * STEP - GAP;
+  const chartWidth = Math.max(logicalCell, chart.length * step - TILE_GAP);
+  const chartHeight = rowCount * step - TILE_GAP;
+  const axisTicks = axisLabels
+    ? axisLabels.ticks && axisLabels.ticks.length >= 2
+      ? [...axisLabels.ticks]
+      : [axisLabels.start, axisLabels.middle ?? "", axisLabels.end]
+    : [];
 
   function valueLabel(datum: SquareMatrixDatum) {
     return (
@@ -223,30 +238,63 @@ export function SquareMatrixChart({
           preserveAspectRatio="xMidYMax meet"
           shapeRendering="crispEdges"
         >
+          <defs>
+            {Object.entries(toneStyle).map(([tone, visual]) => (
+              <pattern
+                key={tone}
+                id={`${patternPrefix}-tone-${tone}`}
+                width={TILE + TILE_GAP}
+                height={TILE + TILE_GAP}
+                patternUnits="userSpaceOnUse"
+              >
+                <rect width={TILE} height={TILE} fill={visual.fill} fillOpacity={visual.opacity} />
+              </pattern>
+            ))}
+            {Object.entries(activeFill).map(([tone, fill]) => (
+              <pattern
+                key={tone}
+                id={`${patternPrefix}-active-${tone}`}
+                width={TILE + TILE_GAP}
+                height={TILE + TILE_GAP}
+                patternUnits="userSpaceOnUse"
+              >
+                <rect width={TILE} height={TILE} fill={fill} />
+              </pattern>
+            ))}
+          </defs>
+
           {chart.map(({ datum, count }, columnIndex) => {
             const isActive = datum.id === resolvedActiveId;
-            const visual = isActive
-              ? { fill: activeFill[activeTone], opacity: 1 }
-              : toneStyle[datum.tone ?? "neutral"];
+            const tone = datum.tone ?? "neutral";
+            const stackHeight = Math.max(0, count * step - TILE_GAP);
             const tabbableId = chart.some(({ datum: item }) => item.id === rovingId)
               ? rovingId
               : chart[0]?.datum.id;
 
             return (
               <g key={datum.id}>
-                {Array.from({ length: count }, (_, rowIndex) => (
-                  <rect
-                    key={`${datum.id}-${rowIndex}`}
-                    aria-hidden="true"
-                    x={columnIndex * STEP}
-                    y={chartHeight - CELL - rowIndex * STEP}
-                    width={CELL}
-                    height={CELL}
-                    fill={visual.fill}
-                    fillOpacity={visual.opacity}
-                    className="transition-[fill,fill-opacity] duration-200 ease-fabrica motion-reduce:transition-none"
-                  />
-                ))}
+                {stackHeight > 0 && (
+                  <>
+                    <rect
+                      aria-hidden="true"
+                      x={columnIndex * step}
+                      y={chartHeight - stackHeight}
+                      width={logicalCell}
+                      height={stackHeight}
+                      fill={`url(#${patternPrefix}-tone-${tone})`}
+                    />
+                    <rect
+                      aria-hidden="true"
+                      x={columnIndex * step}
+                      y={chartHeight - stackHeight}
+                      width={logicalCell}
+                      height={stackHeight}
+                      fill={`url(#${patternPrefix}-active-${activeTone})`}
+                      opacity={isActive ? 1 : 0}
+                      className="transition-opacity duration-200 ease-fabrica motion-reduce:transition-none"
+                    />
+                  </>
+                )}
                 <rect
                   ref={(node) => {
                     buttons.current[columnIndex] = node;
@@ -255,9 +303,9 @@ export function SquareMatrixChart({
                   tabIndex={datum.id === tabbableId ? 0 : -1}
                   aria-label={`${datum.label}: ${valueLabel(datum)}`}
                   aria-describedby={isActive && !compact ? tooltipId : undefined}
-                  x={columnIndex * STEP}
+                  x={columnIndex * step}
                   y={0}
-                  width={CELL}
+                  width={logicalCell}
                   height={chartHeight}
                   fill="transparent"
                   pointerEvents="all"
@@ -294,14 +342,52 @@ export function SquareMatrixChart({
         )}
       </div>
 
-      {!compact && axisLabels && (
-        <div
-          aria-hidden="true"
-          className="mt-3 grid grid-cols-3 items-start gap-2 font-display text-[10px] font-semibold tracking-[0.04em] uppercase"
-        >
-          <span className="truncate text-left">{axisLabels.start}</span>
-          <span className="truncate text-center text-muted">{axisLabels.middle ?? ""}</span>
-          <span className="truncate text-right">{axisLabels.end}</span>
+      {axisLabels && (
+        <div aria-hidden="true" className={cx(compact ? "mt-1.5" : "mt-2.5")}>
+          <div
+            className="grid h-1 border-t border-line"
+            style={{ gridTemplateColumns: `repeat(${axisTicks.length}, minmax(0, 1fr))` }}
+          >
+            {axisTicks.map((label, index) => (
+              <span key={`${index}-${label}`} className="relative h-1">
+                <span
+                  className={cx(
+                    "absolute top-0 h-1 border-l border-line",
+                    index === 0
+                      ? "left-0"
+                      : index === axisTicks.length - 1
+                        ? "right-0"
+                        : "left-1/2",
+                  )}
+                />
+              </span>
+            ))}
+          </div>
+          <div
+            className={cx(
+              "grid items-start gap-1 text-muted tabular-nums",
+              compact
+                ? "text-[9px] leading-3"
+                : "font-display text-[10px] leading-3 font-semibold tracking-[0.02em]",
+            )}
+            style={{ gridTemplateColumns: `repeat(${axisTicks.length}, minmax(0, 1fr))` }}
+          >
+            {axisTicks.map((label, index) => (
+              <span
+                key={`${index}-${label}`}
+                className={cx(
+                  "truncate",
+                  index === 0
+                    ? "text-left"
+                    : index === axisTicks.length - 1
+                      ? "text-right"
+                      : "text-center",
+                )}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 

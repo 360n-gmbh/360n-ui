@@ -3,7 +3,13 @@
 import { useId, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { cx } from "../lib/cx";
-import { allocateSquareMatrixCells, nextSquareMatrixIndex } from "../lib/square-matrix";
+import {
+  allocateSquareMatrixCells,
+  nextSquareMatrixIndex,
+  squareMatrixSubdivision,
+  subdivideSquareMatrixGrid,
+} from "../lib/square-matrix";
+import type { SquareMatrixDensity } from "../lib/square-matrix";
 import type { SquareMatrixActiveTone, SquareMatrixTone } from "./SquareMatrixChart";
 
 export type SquareMatrixBreakdownDatum = {
@@ -22,6 +28,8 @@ export type SquareMatrixBreakdownProps = {
   cells?: number;
   /** Spaltenzahl der Matrix; bei 100 Zellen ergibt 10 das 10×10-Raster. */
   columns?: number;
+  /** Visuelle Unterteilung pro logischer Zelle; Anteile und Rundung bleiben unverändert. */
+  density?: SquareMatrixDensity;
   activeId?: string | null;
   defaultActiveId?: string | null;
   activeTone?: SquareMatrixActiveTone;
@@ -63,6 +71,7 @@ export function SquareMatrixBreakdown({
   ariaLabel,
   cells = 100,
   columns = 10,
+  density = "dense",
   activeId,
   defaultActiveId = null,
   activeTone = "ink",
@@ -76,6 +85,7 @@ export function SquareMatrixBreakdown({
   const legendButtons = useRef<Array<HTMLButtonElement | null>>([]);
   const cellCount = safeInteger(cells, 100, 4, 400);
   const columnCount = safeInteger(columns, 10, 2, 20);
+  const subdivision = squareMatrixSubdivision(density);
   const [internalActiveId, setInternalActiveId] = useState<string | null>(defaultActiveId);
   const [rovingId, setRovingId] = useState<string | null>(defaultActiveId ?? data[0]?.id ?? null);
   const controlled = activeId !== undefined;
@@ -86,12 +96,14 @@ export function SquareMatrixBreakdown({
       data.map((datum) => datum.value),
       cellCount,
     );
-    const nextCells = data.flatMap((datum, segmentIndex) =>
-      Array.from({ length: allocation[segmentIndex] ?? 0 }, (_, localIndex) => ({
-        datum,
-        key: `${datum.id}-${localIndex}`,
-      })),
+    const logicalCells = data.flatMap((datum, segmentIndex) =>
+      Array.from({ length: allocation[segmentIndex] ?? 0 }, () => datum),
     );
+    const nextCells = subdivideSquareMatrixGrid(
+      logicalCells,
+      columnCount,
+      subdivision,
+    ).map((datum, index) => ({ datum, key: `tile-${index}` }));
     return {
       visualCells: nextCells,
       total: data.reduce(
@@ -99,7 +111,7 @@ export function SquareMatrixBreakdown({
         0,
       ),
     };
-  }, [cellCount, data]);
+  }, [cellCount, columnCount, data, subdivision]);
 
   const active = data.find((datum) => datum.id === resolvedActiveId) ?? null;
 
@@ -188,10 +200,13 @@ export function SquareMatrixBreakdown({
 
       <div
         aria-hidden="true"
-        className="grid w-full gap-[clamp(2px,0.65vw,5px)]"
-        style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+        className="grid w-full gap-[clamp(1px,0.22vw,2px)]"
+        style={{
+          gridTemplateColumns: `repeat(${columnCount * subdivision}, minmax(0, 1fr))`,
+        }}
       >
         {visualCells.map(({ datum, key }) => {
+          if (!datum) return <span key={key} aria-hidden className="aspect-square min-w-0" />;
           const selected = datum.id === resolvedActiveId;
           return (
             <span

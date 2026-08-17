@@ -4,7 +4,49 @@ import {
   allocateSquareMatrixCells,
   nextSquareMatrixIndex,
   normalizeSquareMatrixValues,
+  squareMatrixSubdivision,
+  subdivideSquareMatrixGrid,
 } from "../src/lib/square-matrix.ts";
+
+test("ordnet Matrixdichten einer stabilen visuellen Unterteilung zu", () => {
+  assert.equal(squareMatrixSubdivision("regular"), 1);
+  assert.equal(squareMatrixSubdivision("dense"), 2);
+  assert.equal(squareMatrixSubdivision("ultra"), 3);
+});
+
+test("unterteilt logische Rasterzellen räumlich stabil", () => {
+  assert.deepEqual(subdivideSquareMatrixGrid(["a", "b", "c", "d"], 2, 2), [
+    "a",
+    "a",
+    "b",
+    "b",
+    "a",
+    "a",
+    "b",
+    "b",
+    "c",
+    "c",
+    "d",
+    "d",
+    "c",
+    "c",
+    "d",
+    "d",
+  ]);
+});
+
+test("füllt unvollständige letzte Rasterzeilen ohne Verschiebung auf", () => {
+  assert.deepEqual(subdivideSquareMatrixGrid(["a", "b", "c"], 2, 2).slice(-8), [
+    "c",
+    "c",
+    null,
+    null,
+    "c",
+    "c",
+    null,
+    null,
+  ]);
+});
 
 test("normalisiert Null- und nicht endliche Werte ohne leere Division", () => {
   assert.deepEqual(

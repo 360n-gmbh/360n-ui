@@ -185,7 +185,14 @@ function InteractivePreview({ slug, compact = false }: PreviewProps) {
               ariaLabel="Requests im Juni"
               defaultActiveId={`day-${compact ? 11 : 17}`}
               axisLabels={
-                compact ? undefined : { start: "01. Juni", middle: "15. Juni", end: "28. Juni" }
+                compact
+                  ? undefined
+                  : {
+                      start: "01. Juni",
+                      middle: "15. Juni",
+                      end: "28. Juni",
+                      ticks: ["01.", "08.", "15.", "22.", "28. Juni"],
+                    }
               }
             />
           </div>

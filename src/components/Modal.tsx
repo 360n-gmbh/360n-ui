@@ -33,7 +33,7 @@ export function Modal({ open, onClose, title, children, actions, className }: Mo
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/45 p-5 backdrop-blur-[3px]"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/45 p-3 backdrop-blur-[3px] sm:p-5"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -45,7 +45,7 @@ export function Modal({ open, onClose, title, children, actions, className }: Mo
           // max-h + interner Scroll: bei langem Inhalt scrollt der Body,
           // Titel und Aktionsleiste bleiben immer sichtbar (kein „Erstellen"-
           // Button, der erst nach Scrollen erscheint).
-          "flex max-h-[min(85vh,720px)] w-full max-w-[480px] flex-col rounded-panel bg-card p-7 shadow-[0_24px_80px_rgba(0,0,0,0.25)]",
+          "flex max-h-[min(90dvh,760px)] w-full max-w-[480px] min-w-0 flex-col rounded-panel bg-card p-4 shadow-[0_24px_80px_rgba(0,0,0,0.25)] sm:p-7",
           className,
         )}
       >
@@ -56,7 +56,9 @@ export function Modal({ open, onClose, title, children, actions, className }: Mo
           </div>
         )}
         {actions != null && (
-          <div className="mt-4.5 flex shrink-0 justify-end gap-2.5">{actions}</div>
+          <div className="mt-4.5 flex max-w-full shrink-0 flex-wrap justify-end gap-2.5">
+            {actions}
+          </div>
         )}
       </div>
     </div>
