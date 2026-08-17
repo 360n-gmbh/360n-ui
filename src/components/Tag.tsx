@@ -18,12 +18,13 @@ export type TagProps = {
   className?: string;
 };
 
-/** Kleiner runder Chip für Kategorien, Labels und Projekt-Tags. */
+/** Kleiner Chip für Kategorien, Labels und Projekt-Tags — eckig mit runden
+ *  Ecken (Vorgabe 2026-08-16: Badges sind keine Pillen). */
 export function Tag({ children, variant = "ink", className }: TagProps) {
   return (
     <span
       className={cx(
-        "inline-flex items-center rounded-full px-3.5 py-1.5 text-sm whitespace-nowrap",
+        "inline-flex items-center rounded-[6px] px-3 py-1.5 text-sm whitespace-nowrap",
         variantClasses[variant],
         className,
       )}

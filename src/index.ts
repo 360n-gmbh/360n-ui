@@ -72,3 +72,12 @@ export type { ToastKind, ToastOptions, ToastProviderProps } from "./components/T
 
 export { Modal } from "./components/Modal";
 export type { ModalProps } from "./components/Modal";
+
+export { InfoHint } from "./components/InfoHint";
+export type { InfoHintProps } from "./components/InfoHint";
+
+export { StreamFlicker } from "./components/StreamFlicker";
+export type { StreamFlickerProps } from "./components/StreamFlicker";
+
+export { BlockSnake } from "./components/BlockSnake";
+export type { BlockSnakeProps } from "./components/BlockSnake";

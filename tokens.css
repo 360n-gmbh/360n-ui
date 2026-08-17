@@ -80,6 +80,42 @@
       transform: none;
     }
   }
+
+}
+
+/* StreamFlicker: Block-Spur zieht nahtlos nach links (Zellen sind dupliziert,
+   -50 % = exakt eine Kopie), einzelne Zellen flackern hart per steps(2).
+   Bewusst AUSSERHALB von @theme: die Komponente animiert per Inline-Style,
+   und Tailwind 4 emittiert @theme-Keyframes nur, wenn ein --animate-*-Token
+   sie referenziert — hier müssen sie immer mitkommen. */
+@keyframes stream-flow {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes cell-blink {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+/* BlockSnake: 8 quadratische Zellen auf einem Quadrat-Ring, eine „Schlange"
+   aus 3 aktiven Zellen läuft im Uhrzeigersinn — der TTFT-Loader. Flache
+   Keyframe-Segmente = harte Schritte, kein Easing. */
+@keyframes snake-step {
+  0%,
+  37.4% {
+    opacity: 1;
+  }
+  37.5%,
+  100% {
+    opacity: 0.14;
+  }
 }
 
 @layer base {

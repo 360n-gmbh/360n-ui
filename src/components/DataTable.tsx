@@ -37,6 +37,13 @@ export type DataTableProps<T> = {
   /** Werkzeuge rechts in der Kopfleiste (Pills, Filter-Button …). */
   toolbar?: ReactNode;
   onRowClick?: (row: T) => void;
+  /**
+   * Vollflächiges Zeilen-Overlay (z. B. `<StreamFlicker/>` für streamende
+   * Requests): wird absolut über die GANZE Zeile gelegt — die `<tr>` wird
+   * dafür `relative`, das Overlay sitzt in der ersten Zelle und spannt per
+   * `inset-0` über die Zeile. `null` = kein Overlay für diese Zeile.
+   */
+  rowDecoration?: (row: T, index: number) => ReactNode;
   className?: string;
 };
 
@@ -61,6 +68,7 @@ export function DataTable<T>({
   title,
   toolbar,
   onRowClick,
+  rowDecoration,
   className,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
@@ -167,31 +175,42 @@ export function DataTable<T>({
                 </td>
               </tr>
             ) : (
-              visible.map((row, i) => (
-                <tr
-                  key={rowKey(row, i)}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  className={cx(
-                    "transition-colors duration-300 ease-fabrica hover:bg-paper",
-                    onRowClick && "cursor-pointer",
-                  )}
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={cx(
-                        tdClasses,
-                        col.align === "right" && "text-right tabular-nums",
-                        col.cellClassName,
-                      )}
-                    >
-                      {col.render
-                        ? col.render(row)
-                        : String((row as Record<string, unknown>)[col.key] ?? "")}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              visible.map((row, i) => {
+                const decoration = rowDecoration?.(row, i);
+                return (
+                  <tr
+                    key={rowKey(row, i)}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    className={cx(
+                      "transition-colors duration-300 ease-fabrica hover:bg-paper",
+                      onRowClick && "cursor-pointer",
+                      decoration != null && "relative",
+                    )}
+                  >
+                    {columns.map((col, ci) => (
+                      <td
+                        key={col.key}
+                        className={cx(
+                          tdClasses,
+                          col.align === "right" && "text-right tabular-nums",
+                          col.cellClassName,
+                        )}
+                      >
+                        {ci === 0 && decoration != null && (
+                          // inset-0 bezieht sich auf die relative <tr> — das
+                          // Overlay spannt damit über die gesamte Zeile.
+                          <span aria-hidden className="pointer-events-none absolute inset-0">
+                            {decoration}
+                          </span>
+                        )}
+                        {col.render
+                          ? col.render(row)
+                          : String((row as Record<string, unknown>)[col.key] ?? "")}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

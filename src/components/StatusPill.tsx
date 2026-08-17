@@ -4,7 +4,7 @@ import { cx } from "../lib/cx";
 export type StatusPillStatus = "live" | "run" | "warn" | "err" | "idle";
 export type StatusPillVariant = "default" | "dark" | "tint";
 
-/** Punkt mit Ring — dieselbe Geste wie das Eyebrow-Label der Website. */
+/** Status-Marker mit Ring — seit 2026-08-16 eckig mit runden Ecken (kein Kreis). */
 const dotClasses: Record<StatusPillStatus, string> = {
   live: "bg-lime shadow-[0_0_0_3px_rgba(210,255,55,0.4)]",
   run: "bg-cobalt shadow-[0_0_0_3px_rgba(39,54,208,0.15)]",
@@ -47,14 +47,18 @@ export function StatusPill({
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-[7px] rounded-full border px-[11px] py-1 text-xs whitespace-nowrap",
+        // Badge-Form: Viereck mit abgerundeten Ecken (Vorgabe 2026-08-16 —
+        // Badges sind keine Pillen, rounded-full bleibt den Buttons vorbehalten).
+        "inline-flex items-center gap-[7px] rounded-[6px] border px-[9px] py-1 text-xs whitespace-nowrap",
         variant === "dark" && "border-ink bg-ink text-white",
         variant === "tint" && tintClasses[status],
         variant === "default" && "border-line bg-white text-ink",
         className,
       )}
     >
-      {showDot && <span aria-hidden className={cx("size-1.5 rounded-full", dotClasses[status])} />}
+      {showDot && (
+        <span aria-hidden className={cx("size-1.5 rounded-[2px]", dotClasses[status])} />
+      )}
       {children}
     </span>
   );

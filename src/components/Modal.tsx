@@ -42,13 +42,22 @@ export function Modal({ open, onClose, title, children, actions, className }: Mo
         role="dialog"
         aria-modal="true"
         className={cx(
-          "w-full max-w-[480px] rounded-panel bg-card p-7 shadow-[0_24px_80px_rgba(0,0,0,0.25)]",
+          // max-h + interner Scroll: bei langem Inhalt scrollt der Body,
+          // Titel und Aktionsleiste bleiben immer sichtbar (kein „Erstellen"-
+          // Button, der erst nach Scrollen erscheint).
+          "flex max-h-[min(85vh,720px)] w-full max-w-[480px] flex-col rounded-panel bg-card p-7 shadow-[0_24px_80px_rgba(0,0,0,0.25)]",
           className,
         )}
       >
-        {title != null && <h3 className="text-xl">{title}</h3>}
-        {children != null && <div className="mt-2.5 text-[13px] text-muted">{children}</div>}
-        {actions != null && <div className="mt-4.5 flex justify-end gap-2.5">{actions}</div>}
+        {title != null && <h3 className="shrink-0 text-xl">{title}</h3>}
+        {children != null && (
+          <div className="mt-2.5 min-h-0 flex-1 overflow-y-auto text-[13px] text-muted">
+            {children}
+          </div>
+        )}
+        {actions != null && (
+          <div className="mt-4.5 flex shrink-0 justify-end gap-2.5">{actions}</div>
+        )}
       </div>
     </div>
   );
