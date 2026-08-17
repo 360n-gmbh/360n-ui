@@ -20,6 +20,8 @@ import {
   SectionLabel,
   Select,
   Skeleton,
+  SquareMatrixChart,
+  SquareMatrixBreakdown,
   StatusPill,
   StreamFlicker,
   Tabs,
@@ -140,6 +142,76 @@ function InteractivePreview({ slug, compact = false }: PreviewProps) {
           delta={{ label: "+18 %", tone: "up" }}
           sparkline={[18, 22, 19, 30, 28, 42, 48]}
         />
+      );
+    case "square-matrix-chart": {
+      const values = compact
+        ? [4, 6, 8, 5, 7, 3, 5, 6, 4, 7, 9, 6, 8, 4, 6, 5, 7, 3]
+        : [4, 6, 8, 5, 7, 3, 5, 6, 4, 2, 6, 8, 5, 7, 4, 6, 9, 6, 8, 3, 5, 6, 4, 2, 7, 5, 6, 3];
+      const data = values.map((value, index) => ({
+        id: `day-${index + 1}`,
+        label: `${index + 1}. Juni`,
+        value,
+        valueLabel: `${(value * 428).toLocaleString("de-DE")} Requests`,
+        tone:
+          index >= values.length - 4
+            ? ("soft" as const)
+            : index < 9
+              ? ("neutral" as const)
+              : ("strong" as const),
+      }));
+      return (
+        <div className="w-full max-w-2xl overflow-hidden rounded-panel border border-line bg-white">
+          <div className="flex flex-wrap items-start gap-4 border-b border-line px-5 py-4 sm:px-7">
+            <div>
+              <p className="text-[10px] tracking-[0.11em] uppercase">Requests</p>
+              <p className="mt-2 inline-block bg-lime px-1.5 font-display text-3xl font-semibold tabular-nums sm:text-5xl">
+                +32,6 %
+              </p>
+            </div>
+            {!compact && (
+              <div className="ml-auto flex gap-4 text-[10px] tracking-[0.08em] uppercase">
+                <span className="text-muted">Täglich</span>
+                <span className="text-muted">Wöchentlich</span>
+                <span className="border-b border-ink pb-1">Monatlich</span>
+              </div>
+            )}
+          </div>
+          <div className="px-4 pt-2 pb-4 sm:px-7 sm:pt-5">
+            <SquareMatrixChart
+              data={data}
+              rows={9}
+              compact={compact}
+              maxColumns={compact ? 18 : 32}
+              ariaLabel="Requests im Juni"
+              defaultActiveId={`day-${compact ? 11 : 17}`}
+              axisLabels={
+                compact ? undefined : { start: "01. Juni", middle: "15. Juni", end: "28. Juni" }
+              }
+            />
+          </div>
+        </div>
+      );
+    }
+    case "square-matrix-breakdown":
+      return (
+        <div className="grid w-full max-w-xl gap-5 rounded-panel border border-line bg-white p-5 sm:grid-cols-[minmax(0,1fr)_180px] sm:p-7">
+          <div>
+            <p className="text-[10px] tracking-[0.1em] text-muted uppercase">Model Mix · 30 T</p>
+            <p className="mt-2 font-display text-3xl font-semibold tabular-nums">40.492</p>
+            {!compact && <p className="mt-1 text-[11px] text-muted">Requests über alle Modelle</p>}
+          </div>
+          <SquareMatrixBreakdown
+            ariaLabel="Request-Verteilung nach Modell"
+            compact={compact}
+            defaultActiveId="qwen"
+            data={[
+              { id: "llama", label: "Llama", value: 46, valueLabel: "46 %", tone: "neutral" },
+              { id: "qwen", label: "Qwen", value: 31, valueLabel: "31 %", tone: "strong" },
+              { id: "mistral", label: "Mistral", value: 15, valueLabel: "15 %", tone: "soft" },
+              { id: "other", label: "Weitere", value: 8, valueLabel: "8 %", tone: "lime" },
+            ]}
+          />
+        </div>
       );
     case "data-table": {
       const rows = [

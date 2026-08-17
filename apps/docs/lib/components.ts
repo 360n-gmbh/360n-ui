@@ -196,7 +196,7 @@ export const components: ComponentDoc[] = [
     slug: "kpi-card",
     name: "KpiCard",
     category: "Daten",
-    description: "Kennzahl, Vergleich und monochrome Sparkline in einer ruhigen Karte.",
+    description: "Kennzahl, Vergleich und kompakte Square-Matrix-Sparkline in einer ruhigen Karte.",
     guidance: "Eine Karte beantwortet genau eine Frage. Vergleichszeitraum und Einheit müssen sichtbar sein.",
     code: `<KpiCard
   label="Requests · 30 T"
@@ -209,6 +209,179 @@ export const components: ComponentDoc[] = [
       { name: "value", type: "ReactNode", description: "Formatierter Hauptwert." },
       { name: "deltaTone", type: '"up" | "warn" | "bad" | "calm"', default: '"calm"', description: "Semantik des Vergleichswerts." },
       { name: "sparkline", type: "number[]", description: "Optionale Verlaufspunkte." },
+      classNameProp,
+    ],
+  },
+  {
+    slug: "square-matrix-chart",
+    name: "SquareMatrixChart",
+    category: "Daten",
+    description:
+      "Responsive Zeitreihe aus vertikalen Quadratstapeln mit tastaturbedienbarer Detailansicht.",
+    guidance:
+      "Für Mengen, Kosten und Nutzungsverläufe mit 12 bis etwa 60 Perioden. Grau trägt die Serie, Ink markiert Hover und Fokus; Lime bleibt einer gezielten Akzentserie oder aktiven Hervorhebung vorbehalten.",
+    code: `import { SquareMatrixChart } from "@360n-gmbh/ui";
+
+const days = [
+  { id: "jun-14", label: "14. Juni", value: 1842, valueLabel: "1.842 Requests" },
+  { id: "jun-15", label: "15. Juni", value: 2310, valueLabel: "2.310 Requests", tone: "strong" },
+  { id: "jun-16", label: "16. Juni", value: 920, valueLabel: "920 Requests", tone: "soft" },
+];
+
+<SquareMatrixChart
+  data={days}
+  rows={10}
+  ariaLabel="Requests pro Tag im Juni"
+  defaultActiveId="jun-15"
+  axisLabels={{ start: "01. Juni", middle: "15. Juni", end: "30. Juni" }}
+/>`,
+    props: [
+      {
+        name: "data",
+        type: "SquareMatrixDatum[]",
+        description:
+          "Perioden mit ID, Label, Rohwert und optionaler Formatierung oder Tonalität (Grau, Lime, Amber, Signal).",
+      },
+      {
+        name: "ariaLabel",
+        type: "string",
+        description: "Zugänglicher Name der gesamten Visualisierung.",
+      },
+      {
+        name: "rows",
+        type: "number",
+        default: "10",
+        description: "Maximale Stapelhöhe; wird sicher auf 2 bis 24 Zeilen begrenzt.",
+      },
+      {
+        name: "maxColumns",
+        type: "number",
+        description: "Begrenzt lange Zeitreihen auf die letzten N Perioden.",
+      },
+      {
+        name: "compact",
+        type: "boolean",
+        default: "false",
+        description: "Verdichtete StatCard-Variante mit fünf Zeilen und ohne sichtbare Caption.",
+      },
+      {
+        name: "height",
+        type: "number | string",
+        default: "240 / 36 compact",
+        description:
+          "Stabile Zeichenhöhe für kurze und lange Reihen; Quadrate behalten ihr Seitenverhältnis.",
+      },
+      {
+        name: "domain",
+        type: "readonly [number, number]",
+        description:
+          "Optionale feste Domäne für vergleichbare Charts; Standard ist 0 bis zum höchsten Wert.",
+      },
+      {
+        name: "axisLabels",
+        type: "{ start: string; middle?: string; end: string }",
+        description: "Sichtbare Orientierung für große Zeitreihen; in compact ausgeblendet.",
+      },
+      { name: "activeId", type: "string | null", description: "Kontrollierter aktiver Zeitraum." },
+      {
+        name: "defaultActiveId",
+        type: "string | null",
+        default: "null",
+        description: "Initiale Hervorhebung im unkontrollierten Modus.",
+      },
+      {
+        name: "activeTone",
+        type: '"ink" | "lime"',
+        default: '"ink"',
+        description: "Farbe für Hover, Fokus und Touch.",
+      },
+      {
+        name: "formatValue",
+        type: "(value, datum) => string",
+        description: "Zahlenformatierung, wenn kein valueLabel gesetzt ist.",
+      },
+      {
+        name: "onActiveChange",
+        type: "(datum | null) => void",
+        description: "Meldet die aktive Periode für gekoppelte KPIs oder Details.",
+      },
+      { name: "instruction", type: "string", description: "Bedienhinweis für Screenreader." },
+      {
+        name: "emptyLabel",
+        type: "string",
+        default: '"Keine Daten verfügbar."',
+        description: "Text bei einer leeren Datenreihe.",
+      },
+      classNameProp,
+    ],
+  },
+  {
+    slug: "square-matrix-breakdown",
+    name: "SquareMatrixBreakdown",
+    category: "Daten",
+    description:
+      "100-Zellen-Matrix als präziser, interaktiver Ersatz für Pie- und Donut-Diagramme.",
+    guidance:
+      "Für Anteile eines Ganzen mit höchstens sechs Segmenten. Jede Zelle entspricht bei der Standardgröße ungefähr einem Prozentpunkt; Hover oder Tastaturfokus färben das vollständige Segment schwarz.",
+    code: `import { SquareMatrixBreakdown } from "@360n-gmbh/ui";
+
+<SquareMatrixBreakdown
+  ariaLabel="Request-Verteilung nach Modell"
+  data={[
+    { id: "llama", label: "Llama", value: 46, valueLabel: "46 %" },
+    { id: "qwen", label: "Qwen", value: 31, valueLabel: "31 %", tone: "strong" },
+    { id: "other", label: "Weitere", value: 23, valueLabel: "23 %", tone: "lime" },
+  ]}
+/>`,
+    props: [
+      {
+        name: "data",
+        type: "SquareMatrixBreakdownDatum[]",
+        description:
+          "Segmente mit ID, Label, Anteil und optionalem Grau-, Lime-, Amber- oder Signalton.",
+      },
+      { name: "ariaLabel", type: "string", description: "Zugänglicher Name der Verteilung." },
+      {
+        name: "cells",
+        type: "number",
+        default: "100",
+        description: "Gesamtzahl der Zellen; Rundungsreste werden stabil verteilt.",
+      },
+      {
+        name: "columns",
+        type: "number",
+        default: "10",
+        description: "Spaltenzahl; 10 erzeugt mit 100 Zellen das klassische 10×10-Raster.",
+      },
+      { name: "activeId", type: "string | null", description: "Kontrolliertes aktives Segment." },
+      {
+        name: "defaultActiveId",
+        type: "string | null",
+        default: "null",
+        description: "Initial hervorgehobenes Segment.",
+      },
+      {
+        name: "activeTone",
+        type: '"ink" | "lime"',
+        default: '"ink"',
+        description: "Farbe des aktiven Segments.",
+      },
+      {
+        name: "formatValue",
+        type: "(value, datum) => string",
+        description: "Optionale Wertformatierung für Legende und Screenreader.",
+      },
+      {
+        name: "onActiveChange",
+        type: "(datum | null) => void",
+        description: "Meldet Hover, Fokus und Touch nach außen.",
+      },
+      {
+        name: "compact",
+        type: "boolean",
+        default: "false",
+        description: "Blendet die Legende visuell aus, hält sie aber zugänglich.",
+      },
       classNameProp,
     ],
   },

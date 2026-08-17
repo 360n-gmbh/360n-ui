@@ -26,6 +26,7 @@
   "scripts": {
     "check": "tsc --noEmit",
     "lint": "eslint src",
+    "test": "node --experimental-strip-types --test tests/square-matrix.test.ts",
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"apps/docs/**/*.{ts,tsx,css,md,json}\" \"*.{css,md,json}\"",
     "docs:dev": "npm run dev --workspace @360n-gmbh/ui-docs",
     "docs:check": "npm run check --workspace @360n-gmbh/ui-docs",
