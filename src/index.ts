@@ -2,6 +2,7 @@
 // Tokens separat einbinden: @import "@360n-gmbh/ui/tokens.css";
 
 export { cx } from "./lib/cx";
+export type { SquareMatrixDensity } from "./lib/square-matrix";
 
 export { Button } from "./components/Button";
 export type { ButtonProps, ButtonSize, ButtonVariant } from "./components/Button";
@@ -10,11 +11,7 @@ export { Tag } from "./components/Tag";
 export type { TagProps, TagVariant } from "./components/Tag";
 
 export { StatusPill } from "./components/StatusPill";
-export type {
-  StatusPillProps,
-  StatusPillStatus,
-  StatusPillVariant,
-} from "./components/StatusPill";
+export type { StatusPillProps, StatusPillStatus, StatusPillVariant } from "./components/StatusPill";
 
 export { Field, Input, Textarea, fieldControlClasses } from "./components/Field";
 export type { FieldProps, InputProps, TextareaProps } from "./components/Field";
@@ -44,6 +41,21 @@ export type {
   SparklineProps,
   SparklineTone,
 } from "./components/KpiCard";
+
+export { SquareMatrixChart } from "./components/SquareMatrixChart";
+export type {
+  SquareMatrixActiveTone,
+  SquareMatrixAxisLabels,
+  SquareMatrixChartProps,
+  SquareMatrixDatum,
+  SquareMatrixTone,
+} from "./components/SquareMatrixChart";
+
+export { SquareMatrixBreakdown } from "./components/SquareMatrixBreakdown";
+export type {
+  SquareMatrixBreakdownDatum,
+  SquareMatrixBreakdownProps,
+} from "./components/SquareMatrixBreakdown";
 
 export { Section, SectionLabel } from "./components/Section";
 export type { SectionLabelProps, SectionProps } from "./components/Section";

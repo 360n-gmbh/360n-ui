@@ -2,6 +2,10 @@
 
 360n Design-System: Tokens + React-Komponenten für Console, Admin und Website.
 
+Die deploybare Component-Dokumentation lebt im selben Repo unter `apps/docs`.
+Damit gehören Live-Beispiele, Design-Regeln und Package-Version immer zum
+gleichen Commit.
+
 Das Paket ist ein **Source-Paket** — es liefert TypeScript-Quellen und eine
 Token-Datei, keinen Build. Next.js-Apps kompilieren die Komponenten selbst
 (`transpilePackages`), dadurch gibt es genau eine Wahrheit für Tokens und
@@ -115,7 +119,9 @@ Tints) sowie Shimmer-, Blink- und Toast-Keyframes und die Base-Layer
 | `Select`, `Toggle`, `Checkbox`, `Radio` | Formular-Controls aus Console-Kapitel 014 |
 | `Skeleton` | Mist-Schimmer — **der Lade-Standard** |
 | `EmptyState` | gestrichelte Karte mit Icon-Kachel und Primäraktion |
-| `KpiCard`, `Sparkline` | KPI-Zahl mit Delta-Pill und monochromer Sparkline |
+| `KpiCard`, `Sparkline` | KPI-Zahl mit Delta-Pill und kompakter Square-Matrix-Sparkline |
+| `SquareMatrixChart` | responsive Zeitreihe aus feinen Quadratstapeln; Hover/Fokus in Ink, regelbare Rasterdichte |
+| `SquareMatrixBreakdown` | 100 logische Zellen als fein unterteilte Pie-/Donut-Alternative mit Segmentfokus |
 | `Section`, `SectionLabel` | Seitensektion + Eyebrow-Label mit Lime-Punkt |
 | `Tabs`, `Breadcrumbs` | Navigation (Ink-Unterstrich, Muted-Brotkrumen) |
 | `DataTable` | generisch: Spalten-Definition, sortierbar, rechtsbündige Zahlen, Footer-Pagination, Skeleton-Ladezustand |
@@ -141,6 +147,9 @@ Tints) sowie Shimmer-, Blink- und Toast-Keyframes und die Base-Layer
 npm install
 npm run check   # tsc --noEmit
 npm run lint    # eslint src
+npm run docs:dev    # Component Docs auf http://localhost:3003
+npm run docs:check  # Docs-Typecheck
+npm run docs:build  # statischer Export mit allen Component-Seiten
 ```
 
 Kein Build-Schritt — die Quellen sind das Artefakt.
@@ -151,14 +160,14 @@ Der aktive `.github/workflows/ci.yml` prüft `npm ci`, Audit ab Moderate, TypeSc
 und ESLint bei jedem Push auf `main` sowie bei jedem Pull Request; Actions sind auf
 volle Commit-SHAs gepinnt.
 
-Ein GitHub-Release (oder manueller Workflow-Start) publiziert das Paket über
-`.github/workflows/publish.yml` nach GitHub Packages
-(`https://npm.pkg.github.com`, Scope `@360n-gmbh`).
+`release.yml` nutzt Release Please: Änderungen auf `main` sammeln sich in einer
+Release-PR. Beim Merge entstehen Version, Changelog und GitHub Release; derselbe
+Lauf veröffentlicht `@360n-gmbh/ui` nach GitHub Packages. `docs.yml` baut und
+deployt die statische Component-Dokumentation bei jedem Push auf `main`.
 
-> **Einmalig nachziehen:** Nur die Publish-Datei liegt derzeit geparkt unter
-> `.github/publish.workflow.yml` (der Einrichtungs-Token durfte keine
-> Workflow-Dateien pushen). Nach `.github/workflows/publish.yml` verschieben —
-> am schnellsten im GitHub-Web-UI, oder lokal nach `gh auth refresh -s workflow`.
+Die Informationsarchitektur der Docs ist vom MIT-lizenzierten shadcn/ui-Projekt
+inspiriert. Der erforderliche Hinweis steht in `THIRD_PARTY_NOTICES.md`; 360n-
+Komponenten und Inhalte bleiben proprietär.
 
 ## Lizenz
 

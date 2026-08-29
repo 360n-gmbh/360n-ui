@@ -3,7 +3,14 @@
   "version": "0.1.0",
   "description": "360n Design-System: Tokens + React-Komponenten für Console, Admin und Website",
   "license": "UNLICENSED",
+  "packageManager": "npm@11.4.2",
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
+  "workspaces": [
+    "apps/docs"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./tokens.css": "./tokens.css"
@@ -19,7 +26,11 @@
   "scripts": {
     "check": "tsc --noEmit",
     "lint": "eslint src",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"*.{css,md,json}\""
+    "test": "node --experimental-strip-types --test tests/square-matrix.test.ts",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"apps/docs/**/*.{ts,tsx,css,md,json}\" \"*.{css,md,json}\"",
+    "docs:dev": "npm run dev --workspace @360n-gmbh/ui-docs",
+    "docs:check": "npm run check --workspace @360n-gmbh/ui-docs",
+    "docs:build": "npm run build --workspace @360n-gmbh/ui-docs"
   },
   "peerDependencies": {
     "lucide-react": ">=0.400.0",
@@ -37,10 +48,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
     "eslint": "^9.30.0",
     "prettier": "^3.6.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.35.0"
   },

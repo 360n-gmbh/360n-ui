@@ -1,64 +1,60 @@
 import type { ReactNode } from "react";
 import { cx } from "../lib/cx";
 import { Skeleton } from "./Skeleton";
+import { SquareMatrixChart } from "./SquareMatrixChart";
 
 export type SparklineTone = "lime" | "amber" | "signal";
 
-const toneFill: Record<SparklineTone, string> = {
-  lime: "var(--color-lime)",
-  amber: "var(--color-amber)",
-  signal: "var(--color-signal)",
-};
-
 export type SparklineProps = {
-  /** Rohwerte in zeitlicher Reihenfolge — werden auf die ViewBox normalisiert. */
+  /** Rohwerte in zeitlicher Reihenfolge — werden auf Quadratstapel normalisiert. */
   points: number[];
-  /** Farbe des letzten Punkts — nur er trägt Farbe, die Linie bleibt Ink. */
+  /** Semantik des letzten Zeitraums; Lime bleibt als sichtbarer Akzent erhalten. */
   tone?: SparklineTone;
+  /** Zugänglicher Name der kompakten Zeitreihe. */
+  ariaLabel?: string;
   className?: string;
 };
 
 /**
- * Monochrome Sparkline: Serie in Ink 1,5 px, nur der aktuelle Wert
- * trägt Farbe (Lime = gut, Amber = Drift, Signal = schlecht).
+ * Rückwärtskompatibler StatCard-Graph in der Square-Matrix-Sprache. Bestehende
+ * `points`-Aufrufer brauchen keine Migration; Zwischenwerte werden nur
+ * visuell interpoliert, Originalwerte und Endpunkte bleiben unverändert.
  */
-export function Sparkline({ points, tone = "lime", className }: SparklineProps) {
+export function Sparkline({
+  points,
+  tone = "lime",
+  ariaLabel = "Verlauf der Kennzahl",
+  className,
+}: SparklineProps) {
   if (points.length < 2) return null;
-  const w = 120;
-  const h = 34;
-  const padX = 3;
-  const padY = 4;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const span = max - min || 1;
-  const coords = points.map((v, i) => {
-    const x = padX + (i / (points.length - 1)) * (w - padX * 2);
-    const y = padY + (1 - (v - min) / span) * (h - padY * 2);
-    return [Math.round(x * 10) / 10, Math.round(y * 10) / 10] as const;
+
+  const columnCount = Math.max(24, points.length);
+  const data = Array.from({ length: columnCount }, (_, index) => {
+    const position = (index / (columnCount - 1)) * (points.length - 1);
+    const lowerIndex = Math.floor(position);
+    const upperIndex = Math.min(points.length - 1, Math.ceil(position));
+    const fraction = position - lowerIndex;
+    const lower = points[lowerIndex] ?? 0;
+    const upper = points[upperIndex] ?? lower;
+    const value = lower + (upper - lower) * fraction;
+    const isLast = index === columnCount - 1;
+    return {
+      id: `spark-${index}`,
+      label: `Wert ${index + 1} von ${columnCount}`,
+      value,
+      tone: isLast ? tone : ("neutral" as const),
+    };
   });
-  const last = coords[coords.length - 1]!;
+
   return (
-    <svg
-      aria-hidden
-      className={cx("mt-2 block h-[34px] w-full", className)}
-      viewBox={`0 0 ${w} ${h}`}
-      preserveAspectRatio="none"
-    >
-      <polyline
-        points={coords.map(([x, y]) => `${x},${y}`).join(" ")}
-        fill="none"
-        stroke="var(--color-ink)"
-        strokeWidth="1.5"
-      />
-      <circle
-        cx={last[0]}
-        cy={last[1]}
-        r="2.6"
-        fill={toneFill[tone]}
-        stroke="var(--color-ink)"
-        strokeWidth="1"
-      />
-    </svg>
+    <SquareMatrixChart
+      data={data}
+      rows={3}
+      maxColumns={24}
+      compact
+      ariaLabel={ariaLabel}
+      className={cx("mt-2 w-full", className)}
+    />
   );
 }
 
@@ -89,7 +85,7 @@ export type KpiCardProps = {
 
 /**
  * KPI-Karte: Zahl in Inter SemiBold mit Tabellenziffern, Label in Muted,
- * Delta als Pill, Sparkline monochrom mit einem farbigen Endpunkt.
+ * Delta als Pill, kompakter Square-Matrix-Verlauf mit optionalem Lime-Endpunkt.
  */
 export function KpiCard({
   label,
